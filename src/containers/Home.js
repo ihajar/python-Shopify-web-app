@@ -102,7 +102,7 @@ const HomepageLayout = () => (
     {/* <Segment style={{ padding: "1em 0em" }} vertical> */}
       <Grid container stackable verticalAlign="middle">
         <Grid.Row>
-          <Grid.Column width={8}>
+          <Grid.Column width={8} textAlign="center">
             <Header as="h3" style={{ fontSize: "2em" }}>
               Buy Online With Us
             </Header>
@@ -117,60 +117,59 @@ const HomepageLayout = () => (
               Yes that's right, you thought it was the stuff of dreams, but yes a way much more of only products.
             </p>
           </Grid.Column>
-          <Grid.Column floated="right" width={8}>
+          <Grid.Column floated="left" width={8}>
             <Image
-             
-              
               size="massive"
               src={landing}
             />
           </Grid.Column>
         </Grid.Row>
-        <Grid.Row>
+        {/* <Grid.Row>
           <Grid.Column textAlign="left">
             <Button size="huge" color="orange">Check Them Out</Button>
           </Grid.Column>
-        </Grid.Row>
+        </Grid.Row> */}
       </Grid>
     {/* </Segment> */}
 
     {/* <Segment style={{ padding: "0em" }} vertical textAlign='center'  color='white'> */}
-    <Card.Group centered  style={{ padding: "6em 0em"}}>
+    <Grid  container stackable centered verticalAlign="middle" style={{padding:"4em 0em"}}>
+    <Card.Group >
+      <Card>
+       
+        <Image
+    src={glam}
+    size='medium'
+    
+    rounded
+    style={{height:"25em"}}/>
+       
+      </Card>
     {/* <Card color='red' image='' />
     <Card color='orange' image='' />
     <Card color='yellow' image={logo} /> */}
-    <Image
-    src={glam}
-    size='medium'
-    centered
-    rounded
-    style={{height:"25em"}}/>
     
-    {/* <Card centered
-    color='violet'
-    size='large'
-     header='Our latest glam collections'
-    image={glam}
-  /> */}
-   <Image
+    
+    <Card>
+    <Image
     src={gift}
     size='medium'
-    centered
     rounded
     style={{height:"25em"}}/>
+    </Card>
+   <Card>
+   <Image
+    src={fashion}
+    size='medium'
+    rounded
+    style={{height:"25em"}}/>
+   </Card>
 
   
-<Image
 
-    src={fashion}
-    
-    size='medium'
-    centered
-    rounded
-    style={{height:"25em"}}/>
   </Card.Group>
   {/* </Segment> */}
-
+  </Grid>
    
   </ResponsiveContainer>
 );

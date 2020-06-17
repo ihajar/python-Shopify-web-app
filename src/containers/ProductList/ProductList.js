@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 
 import classes from './ProductList.module.scss'
 import axios from 'axios'
-import {
+import { connect } from 'react-redux'
+  import {
     Button,
     Card,
     Icon,
@@ -18,6 +19,8 @@ import {
 } from 'semantic-ui-react'
 import { productListURL, addToCartURL } from '../../constants'
 import {authAxios} from '../../utils'
+import { fetchCart } from '../../store/actions/cart'
+
 
 const paragraph = <Image src='/images/wireframe/short-paragraph.png' />
 
@@ -64,8 +67,9 @@ class ProductList extends Component {
         authAxios
             .post(addToCartURL, { slug })
             .then(res => {
-                console.log(res.data)
-                // update the cart count
+                // console.log(res.data)
+                // update the cart count:
+                this.props.fetchCart();
                 this.setState({ loading: false })
             })
             .catch(err => {
@@ -152,4 +156,13 @@ class ProductList extends Component {
 
 }
 
-export default ProductList
+const mapDispatchToProps = dispath => {
+    return {
+        fetchCart: () => dispath(fetchCart())
+    }
+}
+
+export default connect(
+    null, 
+    mapDispatchToProps
+    )(ProductList);
