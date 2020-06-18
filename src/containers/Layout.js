@@ -60,7 +60,7 @@ class CustomLayout extends React.Component {
                                     })}
                                     {cart && cart.order_items.length < 1 ?<Dropdown.Item>No items in your cart</Dropdown.Item>:null}
                                     <Dropdown.Divider />
-                                    <Dropdown.Item icon='arrow right' text='Checkout' onClick={() => this.props.history.push('order-summary')}/>
+                                    <Dropdown.Item icon='arrow circle right' text='Checkout' onClick={() => this.props.history.push('order-summary')}/>
                                 </Dropdown.Menu>
                             </Dropdown>
                             <Menu.Item
