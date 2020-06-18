@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import classes from './ProductList.module.scss'
+
 import axios from 'axios'
 import { connect } from 'react-redux'
   import {
@@ -27,11 +27,11 @@ const paragraph = <Image src='/images/wireframe/short-paragraph.png' />
 
 
 
-class ProductList extends Component {
+class ProductList extends React.Component {
     state = {
         loading: false,
         error: null,
-        data: [],
+        data: []
     }
 
     componentDidMount() {
@@ -39,10 +39,7 @@ class ProductList extends Component {
             loading: true,
         })
 
-        // axios.defaults.headers = {
-        //     Authorization: `Token ${}`
-        // }
-
+        
 
         axios
             .get(productListURL)
@@ -69,7 +66,7 @@ class ProductList extends Component {
             .then(res => {
                 // console.log(res.data)
                 // update the cart count:
-                this.props.fetchCart();
+                this.props.refreshCart();
                 this.setState({ loading: false })
             })
             .catch(err => {
@@ -158,7 +155,7 @@ class ProductList extends Component {
 
 const mapDispatchToProps = dispath => {
     return {
-        fetchCart: () => dispath(fetchCart())
+        refreshCart: () => dispath(fetchCart())
     }
 }
 

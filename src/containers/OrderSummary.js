@@ -1,8 +1,9 @@
 import React from 'react';
-import { Button, Container, Header, Icon, Image, Label, Table, Rating, Segment } from 'semantic-ui-react';
-import { Link } from 'react-router-dom'
+import { Button, Container, Header, Icon, Image, Label, Message, Table, Segment, Dimmer, Loader } from 'semantic-ui-react';
+import { Link, Redirect } from 'react-router-dom'
 import { authAxios } from '../utils';
-import { orderSummaryURL } from '../constants';
+import { addToCartURL, orderSummaryURL, orderItemDeleteURL, orderItemUpdateQuantityURL } from '../constants';
+import { connect } from 'react-redux';
 
 
 
@@ -17,7 +18,7 @@ class OrderSummary extends React.Component {
     }
 
     componentDidMount() {
-        this.handleFetchOrder()
+        this.handleFetchOrder();
     }
 
     handleFetchOrder = () => {
@@ -27,20 +28,96 @@ class OrderSummary extends React.Component {
         .then(res => {
             this.setState({data: res.data, loading: false })
         })
-        .catch(err => {
-            this.setState({error: err, loading: false })
-        });
+        // .catch(err => {
+        //     if (err.response.status == 404) {
+        //         this.setState({
+        //             error: "You don't have currently any order",
+        //             loading: false
+        //         })
+        //     } else {
+        //     this.setState({error: err, loading: false })
+        //     }
+        // })
     }
 
+    // renderVariations = orderItem => {
+    //     let text = "";
+    //     orderItem.item_variatons.forEach(iv => {
+    //         text += `${iv.variation.name}: ${iv.value}, `
+    //     })
+    //     return text
+    // }
 
+    // handleFormatData = itemVariations => {
+    //     // convert [{id: 1},{id: 2}] to [1,2] - they're all variations
+    //     return Object.keys(itemVariations).map(key => {
+    //       return itemVariations[key].id
+    //     })
+    //   };
+
+    // handleAddtoCart = (slug, itemVariations) => {
+    //     this.setState({ loading : true });
+    //     const variations = this.handleFormatData(itemVariations);
+    //     authAxios
+    //     .post(addToCartURL, {slug, variations })
+    //     .then(res => {
+    //         this.handleFetchOrder()
+    //         this.setState({ loading: false })
+    //     })
+    //     .catch(err => {
+    //         this.setState({ error: err, loading: false })
+    //     });
+    // };
+
+    handleRemoveQuantityFromCart  = slug => {
+        authAxios
+        .post(orderItemUpdateQuantityURL, {slug})
+        .then(res => {
+            this.handleFetchOrder()
+        })
+        .catch(err => {
+            this.setState({ error: err })
+        });
+    };
+
+    handleRemoveItem = itemID => {
+        authAxios
+        .delete(orderItemDeleteURL(itemID))
+        .then(res => {
+            this.handleFetchOrder();
+        })
+        .catch(err => {
+            this.setState({ error: err });
+        })
+    }
 
     render() {
         const {data, error, loading } = this.state;
-        console.log(data);
         
+        const { isAuthenticated } = this.props;
+        if (!isAuthenticated) {
+            return <Redirect to="/login"/>
+        }
+        console.log(data);
         return (
             <Container>
                 <Header as='h1'>Order Summary</Header>
+                {error && (
+                    <Message 
+                    error
+                    header="There was an error"
+                    contect={JSON.stringify(error)}
+                    />
+                )}
+                {loading && (
+                    <Segment>
+                        <Dimmer active inverted>
+                            <Loader inverted>Loading</Loader>
+                        </Dimmer>
+                        <Image src="https://react.semantic-ui.com/images/wireframe/short-paragraph.png"/>
+                    </Segment>
+                )}
+
                 {data &&<Table padded inverted size='large'>
 
                  
@@ -48,7 +125,7 @@ class OrderSummary extends React.Component {
                             <Table.Row>
                             <Table.HeaderCell colSpan='9'>
                                 <Link to='/products'>
-                                <Button inverted color='yellow' size='large' icon='arrow circle left' content='Continue Shopping'/>
+                                <Button inverted color='orange' size='large' icon='arrow circle left' content='Continue Shopping'/>
                                 </Link>
                                
          
@@ -59,13 +136,16 @@ class OrderSummary extends React.Component {
                             <Table.Cell />
                             <Table.Cell />
                             <Table.Cell />
-                            <Table.Cell colSpan='9' as='h3'>
+                            <Table.Cell colSpan='9' as='h3' textAlign="center">
                                 Total: ${data.total}
                             </Table.Cell>
-                            <Table.Cell colSpan='3' textAlign="right">
-                            <Button color="green" size='large'>
-                                     Checkout
-                                 </Button>
+                            <Table.Cell colSpan='3'>
+                                <Link to='checkout'>
+                                    <Button color="green" size='large' floated="right">
+                                        Checkout
+                                    </Button>
+                                </Link>
+                            
                             </Table.Cell>
                             
                             {/* <Table.HeaderCell colSpan='15' textAlign="right">
@@ -81,13 +161,14 @@ class OrderSummary extends React.Component {
                         </Table.Body>
                    
                      </Table>}
-                {data && <Table celled padded>
+
+                {data && <Table celled padded size="large">
                            
                     <Table.Header>
                         <Table.Row>
                             
                             <Table.HeaderCell>Product Number</Table.HeaderCell>
-                            <Table.HeaderCell>Overview</Table.HeaderCell>
+                            {/* <Table.HeaderCell>***</Table.HeaderCell> */}
                             <Table.HeaderCell>Product Name</Table.HeaderCell>
                             <Table.HeaderCell>Price</Table.HeaderCell>
                             <Table.HeaderCell>Quantity</Table.HeaderCell>
@@ -97,21 +178,52 @@ class OrderSummary extends React.Component {
                     </Table.Header>
                     
                     <Table.Body>
-                        {data.order_items.map((order_item, i) =>{
+                        {data.order_items.map((orderItem, i) =>{
                             return (
-                                <Table.Row key={order_item.id}>
-                            <Table.Cell>{i}</Table.Cell>
+                                <Table.Row key={orderItem.id}>
+                            <Table.Cell>{i + 1 }</Table.Cell>
+                            {/* <Table.Cell>
+                                <Image size="small" src={orderItem.image}/>
+                            </Table.Cell> */}
                             <Table.Cell>
-                                <Image size="small" src={order_item.item_obj.image}/>
+                                {orderItem.item_obj.title}
+                                {/* {this.renderVariations(orderItem)} */}
                             </Table.Cell>
-                            <Table.Cell>{order_item.item}</Table.Cell>
-                            <Table.Cell>${order_item.item_obj.price}</Table.Cell>
-                            <Table.Cell>{order_item.quantity}</Table.Cell>
+                            <Table.Cell>${orderItem.item_obj.price}</Table.Cell>
                             <Table.Cell>
-                                {order_item.item_obj.discount_price && (<Label as='a' color='red' tag>On Discount</Label>)}
-
-                                  ${order_item.final_price}
-                                </Table.Cell>
+                                {/* <Icon
+                                    name="minus"
+                                    style={{ float:"left", cursor: "pointer" }}
+                                    onClick={() =>
+                                        this.handleRemoveQuantityFromCart(orderItem.item_obj.slug)
+                                }
+                                /> */}
+                                {orderItem.quantity}
+                                {/* <Icon
+                                    name="plus"
+                                    style={{ float:"right", cursor:"pointer" }}
+                                    onClick={() => 
+                                        this.handleAddtoCart(
+                                            orderItem.item_obj.slug,
+                                            orderItem.item_variatons
+                                        )
+                                    }
+                                /> */}
+                            </Table.Cell>
+                            <Table.Cell>
+                                {orderItem.item_obj.discount_price && (
+                                    <Label as='a' tag>
+                                        % On Discount
+                                    </Label>
+                                    )}
+                                ${orderItem.final_price}
+                                <Icon
+                                    name="trash"
+                                    color="red"
+                                    style={{ float: "right", cursor:"pointer" }}
+                                    onClick={() => this.handleRemoveItem(orderItem.id)}
+                                />
+                            </Table.Cell>
                         </Table.Row>
                             )
                         })}
@@ -127,4 +239,10 @@ class OrderSummary extends React.Component {
 }
 
 
-export default OrderSummary
+const mapStateToProps = state => {
+    return {
+        isAuthenticated: state.auth.token !== null
+    };
+};
+
+export default connect(mapStateToProps)(OrderSummary);

@@ -1,13 +1,14 @@
 from django.conf import settings
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from rest_framework.generics import ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
-from core.models import Item, OrderItem, Order
+from core.models import Item, OrderItem, Order, Variation, ItemVariation
 from .serializers import ItemSerializer, OrderSerializer
 
 
@@ -62,3 +63,39 @@ class OrderDetailView(RetrieveAPIView):
 
 
 
+class OrderItemDeleteView(DestroyAPIView):
+    permission_classes = (IsAuthenticated, )
+    queryset = OrderItem.objects.all()
+
+
+class OrderQuantityUpdateView(APIView):
+    def post(self, request, *args, **kwargs):
+        slug = request.data.get('slug', None)
+        if slug is None:
+            return Response({"message": "Invalid data"},
+            status=HTTP_400_BAD_REQUEST)
+            item = get_object_or_404(Item, slug=slug)
+            order_qs = Order.objects.filter(
+                user = request.user,
+                ordered = False
+            )
+            
+            if order_qs.exists():
+                order = order_qs[0]
+                if order.items.filter(item__slug=item.slug).exists():
+                    order_item = OrderItem.objects.filter(
+                        item = item,
+                        user = request.user,
+                        ordered = False
+                    )[0]
+                    if order_item.quantity > 1:
+                        order_item.quantity -= 1
+                        order_item.save()
+                    else:
+                        order_items.remove(order_item)
+                    return Response(status=HTTP_200_OK)
+                else:
+                    return Response({"message": "This item was not in your shopping cart"}, status=HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"message": "You do not have an active order"}, status=HTTP_400_BAD_REQUEST)
+        
