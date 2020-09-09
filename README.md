@@ -9,12 +9,12 @@ React semantic UI in the fronted, and rest API
 to run the app locally
 you need to install virtualenv on your computer
 
-cd to-project-folder
+## cd to-project-folder
 
-source env/bin/activate
+## source env/bin/activate
 
-python manage.py runserver
+## python manage.py runserver
 
-cd to-src-eact-folder
-npm i
-npm start
+## cd to-src-eact-folder
+## npm i
+## npm start
